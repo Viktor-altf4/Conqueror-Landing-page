@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONQUEROR</title>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --deep: #111111;
+    --card: #161616;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --gold-dim: #8a6f2e;
+    --white: #f5f0e8;
+    --off-white: #d8d0c0;
+    --muted: #7a7060;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'EB Garamond', Georgia, serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, rgba(201,168,76,0.04) 0%, transparent 60%);
+  }
+
+  /* Gold cross / ornamental lines */
+  .hero-lines {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .hero-lines svg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    opacity: 0.12;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'UnifrakturMaguntia', serif;
+    font-size: clamp(4rem, 14vw, 11rem);
+    color: var(--white);
+    text-align: center;
+    line-height: 0.9;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 0.5s forwards;
+    filter: drop-shadow(0 0 40px rgba(201,168,76,0.2));
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 40%, var(--gold-dim) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2.5rem 0;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.8s forwards;
+  }
+  .hero-divider-line {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+  }
+  .hero-divider-line.right {
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+  .hero-divider-icon {
+    color: var(--gold);
+    font-size: 1.2rem;
+  }
+
+  .hero-verse {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    color: var(--off-white);
+    text-align: center;
+    max-width: 620px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 1s ease 1s forwards;
+  }
+
+  .hero-verse cite {
+    display: block;
+    font-style: normal;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-top: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  .hero-cta {
+    margin-top: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.2s forwards;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--black);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #fff0b0, var(--gold-light));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201,168,76,0.3);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    border: 1px solid var(--gold-dim);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .btn-secondary:hover {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.06);
+    transform: translateY(-2px);
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.8s forwards;
+  }
+  .scroll-indicator span {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .scroll-arrow {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(180deg, var(--gold-dim), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  /* ─── ABOUT ─── */
+  .section {
+    padding: clamp(4rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem);
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+  }
+  .section-title .gold { color: var(--gold); }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .about-body {
+    font-size: 1.15rem;
+    line-height: 1.9;
+    color: var(--off-white);
+  }
+  .about-body p + p { margin-top: 1.2rem; }
+
+  .about-quote {
+    border-left: 2px solid var(--gold);
+    padding-left: 2rem;
+    margin: 2.5rem 0;
+  }
+  .about-quote blockquote {
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--white);
+  }
+  .about-quote cite {
+    display: block;
+    font-style: normal;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-top: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  .about-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .crest {
+    width: 320px;
+    height: 320px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .crest-ring {
+    position: absolute;
+    border: 1px solid;
+    border-radius: 50%;
+    animation: rotateSlow linear infinite;
+  }
+  .crest-ring:nth-child(1) {
+    width: 100%; height: 100%;
+    border-color: rgba(201,168,76,0.15);
+    animation-duration: 60s;
+  }
+  .crest-ring:nth-child(2) {
+    width: 80%; height: 80%;
+    border-color: rgba(201,168,76,0.25);
+    animation-duration: 45s;
+    animation-direction: reverse;
+  }
+  .crest-ring:nth-child(3) {
+    width: 60%; height: 60%;
+    border-color: rgba(201,168,76,0.15);
+    animation-duration: 30s;
+    border-style: dashed;
+  }
+  .crest-center {
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(201,168,76,0.08), transparent);
+    border: 1px solid rgba(201,168,76,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.3rem;
+    position: relative;
+    z-index: 2;
+  }
+  .crest-word {
+    font-family: 'UnifrakturMaguntia', serif;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.05em;
+  }
+  .crest-cross {
+    color: var(--gold);
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+
+  /* ─── PILLARS ─── */
+  .pillars-section {
+    background: var(--deep);
+    border-top: 1px solid rgba(201,168,76,0.1);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+  .pillars-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .pillars-header {
+    margin-bottom: 4rem;
+  }
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .pillar {
+    padding: 3rem 2.5rem;
+    background: var(--card);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s ease;
+  }
+  .pillar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+  }
+  .pillar:hover::before { transform: scaleX(1); }
+  .pillar:hover { background: rgba(201,168,76,0.04); }
+
+  .pillar-number {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .pillar-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    color: var(--gold);
+  }
+  .pillar-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--white);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .pillar-body {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  /* ─── VERSE BANNER ─── */
+  .verse-banner {
+    padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 8vw, 6rem);
+    text-align: center;
+    background:
+      radial-gradient(ellipse 80% 100% at 50% 50%, rgba(201,168,76,0.05) 0%, transparent 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  .verse-banner::before {
+    content: '✝';
+    position: absolute;
+    font-size: 40vw;
+    color: rgba(201,168,76,0.02);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    font-family: serif;
+  }
+  .verse-text {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+    line-height: 1.6;
+    color: var(--white);
+    max-width: 800px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+  .verse-text .highlight {
+    color: var(--gold);
+    font-style: normal;
+  }
+  .verse-ref {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
+  .verse-ornament {
+    font-size: 1.5rem;
+    color: var(--gold-dim);
+    margin: 2rem 0;
+    letter-spacing: 0.5rem;
+  }
+
+  /* ─── COMMUNITY ─── */
+  .community-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+  .community-text .section-title { margin-bottom: 1.5rem; }
+  .community-body {
+    font-size: 1.1rem;
+    line-height: 1.9;
+    color: var(--off-white);
+  }
+  .community-body p + p { margin-top: 1.2rem; }
+
+  .community-verse {
+    margin-top: 2.5rem;
+    padding: 2rem;
+    border: 1px solid rgba(201,168,76,0.2);
+    background: rgba(201,168,76,0.03);
+    position: relative;
+  }
+  .community-verse::before {
+    content: '"';
+    position: absolute;
+    top: -1.2rem;
+    left: 1.5rem;
+    font-family: 'EB Garamond', serif;
+    font-size: 4rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .community-verse p {
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--off-white);
+    margin-top: 0.5rem;
+  }
+  .community-verse cite {
+    display: block;
+    font-style: normal;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-top: 1rem;
+    text-transform: uppercase;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .stat {
+    text-align: center;
+    padding: 2rem 1rem;
+    border: 1px solid rgba(201,168,76,0.12);
+    background: var(--card);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .stat-number {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2.2rem;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.35em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ─── CHARITY / MISSION ─── */
+  .mission-section {
+    background: var(--deep);
+    border-top: 1px solid rgba(201,168,76,0.1);
+  }
+  .mission-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .mission-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 4rem;
+  }
+  .mission-card {
+    padding: 3rem 2rem;
+    background: var(--card);
+    text-align: left;
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+  .mission-card:hover { transform: translateY(-4px); }
+  .mission-card-accent {
+    width: 40px;
+    height: 2px;
+    background: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+  .mission-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--white);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .mission-card-body {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+  .mission-card-icon {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    font-size: 1.5rem;
+    color: rgba(201,168,76,0.2);
+  }
+
+  /* ─── JOIN ─── */
+  .join-section {
+    padding: clamp(5rem, 10vw, 9rem) clamp(1.5rem, 8vw, 6rem);
+    text-align: center;
+    background:
+      radial-gradient(ellipse 60% 80% at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 70%);
+  }
+  .join-inner {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .join-title {
+    font-family: 'UnifrakturMaguntia', serif;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dim));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.15));
+  }
+  .join-sub {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .join-body {
+    font-size: 1.1rem;
+    line-height: 1.9;
+    color: var(--off-white);
+    margin-bottom: 3rem;
+  }
+
+  .email-form {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+    margin: 0 auto 3rem;
+  }
+  .email-input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-right: none;
+    color: var(--white);
+    font-family: 'EB Garamond', serif;
+    font-size: 1rem;
+    padding: 0.9rem 1.5rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .email-input:focus { border-color: var(--gold-dim); }
+  .email-input::placeholder { color: var(--muted); }
+  .email-submit {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--black);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    padding: 0.9rem 1.8rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  .email-submit:hover {
+    background: linear-gradient(135deg, #fff0b0, var(--gold-light));
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--black);
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding: 3rem clamp(1.5rem, 8vw, 6rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 1.5rem;
+  }
+  .footer-brand {
+    font-family: 'UnifrakturMaguntia', serif;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .footer-tagline {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.35em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+  .footer-nav {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .footer-nav a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .footer-nav a:hover { color: var(--gold); }
+  .footer-copy {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'EB Garamond', serif;
+  }
+
+  /* ─── ORNAMENTAL DIVIDERS ─── */
+  .ornament {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.8rem;
+    padding: 1rem 0;
+    opacity: 0.6;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.15); }
+  }
+
+  /* Intersection Observer fade-in */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem clamp(1.5rem, 5vw, 4rem);
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+  .nav-logo {
+    font-family: 'UnifrakturMaguntia', serif;
+    font-size: 1.6rem;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--gold);
+    padding: 0.6rem 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .nav-cta:hover { background: var(--gold-light); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .about-grid,
+    .community-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .pillars-grid,
+    .mission-grid { grid-template-columns: 1fr; }
+    .about-visual { display: none; }
+    .nav-links { display: none; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    footer { flex-direction: column; text-align: center; }
+    .footer-nav { flex-wrap: wrap; justify-content: center; }
+    .email-form { flex-direction: column; }
+    .email-input { border-right: 1px solid rgba(201,168,76,0.2); border-bottom: none; }
+    .email-submit { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Conqueror</a>
+  <ul class="nav-links">
+    <li><a href="#about">Our Story</a></li>
+    <li><a href="#community">Community</a></li>
+    <li><a href="#mission">Mission</a></li>
+    <li><a href="#join">Join Us</a></li>
+  </ul>
+  <a href="#join" class="nav-cta">Join the Movement</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines">
+    <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <line x1="720" y1="0" x2="720" y2="900" stroke="#c9a84c" stroke-width="0.5"/>
+      <line x1="0" y1="450" x2="1440" y2="450" stroke="#c9a84c" stroke-width="0.5"/>
+      <circle cx="720" cy="450" r="300" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+      <circle cx="720" cy="450" r="200" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+      <circle cx="720" cy="450" r="100" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+      <polygon points="720,150 870,450 720,750 570,450" fill="none" stroke="#c9a84c" stroke-width="0.5"/>
+    </svg>
+  </div>
+
+  <p class="hero-eyebrow">Est. by Victor Yankho Chisambiro</p>
+
+  <h1 class="hero-title"><span>Conqueror</span></h1>
+
+  <div class="hero-divider">
+    <div class="hero-divider-line"></div>
+    <span class="hero-divider-icon">✦</span>
+    <div class="hero-divider-line right"></div>
+  </div>
+
+  <p class="hero-verse">
+    "But thanks be to God, who gives us the victory through our Lord Jesus Christ."
+    <cite>1 Corinthians 15:57</cite>
+  </p>
+
+  <div class="hero-cta">
+    <a href="#community" class="btn-primary">Join the Community</a>
+    <a href="#about" class="btn-secondary">Our Story</a>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="about-grid">
+    <div>
+      <p class="section-label reveal">Our Story</p>
+      <h2 class="section-title reveal reveal-delay-1">
+        Born from the <span class="gold">Struggle,</span><br>
+        Built for the Victor
+      </h2>
+      <div class="about-body">
+        <p class="reveal reveal-delay-2">
+          Conqueror began as a personal revelation — a name tattooed not just on skin, but on the soul.
+          Looking back at the trials, the depression, the seasons of burnout — there was something undeniable:
+          I came out on the other side. Not always unscathed. But standing.
+        </p>
+        <p class="reveal reveal-delay-3">
+          That is what a conqueror is. Not someone who never fell. But someone who rose every time
+          the world told them to stay down. Someone who faced the pain, carried the trauma, and
+          chose — again and again — to grow, to heal, and to love themselves.
+        </p>
+        <div class="about-quote reveal reveal-delay-4">
+          <blockquote>
+            "We are more than conquerors through him who loved us."
+          </blockquote>
+          <cite>Romans 8:37</cite>
+        </div>
+      </div>
+    </div>
+    <div class="about-visual reveal">
+      <div class="crest">
+        <div class="crest-ring"></div>
+        <div class="crest-ring"></div>
+        <div class="crest-ring"></div>
+        <div class="crest-center">
+          <span class="crest-cross">✝</span>
+          <span class="crest-word">Conqueror</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section class="section pillars-section">
+  <div class="pillars-inner">
+    <div class="pillars-header">
+      <p class="section-label reveal" style="justify-content:center;">What We Stand On</p>
+      <h2 class="section-title reveal reveal-delay-1" style="text-align:center;">
+        Three Pillars of the <span class="gold">Conqueror</span>
+      </h2>
+    </div>
+    <div class="pillars-grid">
+      <div class="pillar reveal">
+        <p class="pillar-number">Pillar I</p>
+        <span class="pillar-icon">🏔</span>
+        <h3 class="pillar-title">Overcome</h3>
+        <p class="pillar-body">
+          Every Conqueror carries a story of something they didn't think they could survive.
+          We create a space where that story is honoured — not silenced — as the source of your strength.
+        </p>
+      </div>
+      <div class="pillar reveal reveal-delay-2">
+        <p class="pillar-number">Pillar II</p>
+        <span class="pillar-icon">🤝</span>
+        <h3 class="pillar-title">Community</h3>
+        <p class="pillar-body">
+          You were never meant to do this alone. We are brothers and sisters bound by purpose —
+          carrying each other through the rough, and celebrating each other in the light.
+        </p>
+      </div>
+      <div class="pillar reveal reveal-delay-3">
+        <p class="pillar-number">Pillar III</p>
+        <span class="pillar-icon">🌱</span>
+        <h3 class="pillar-title">Serve</h3>
+        <p class="pillar-body">
+          Growth is not hoarded — it is given. We serve others, give generously,
+          and let the healing we've received become the fuel to heal the world around us.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VERSE BANNER -->
+<div class="verse-banner">
+  <div class="ornament">✦ ✦ ✦</div>
+  <p class="verse-text reveal">
+    "No, in all these things we are <span class="highlight">more than conquerors</span><br>
+    through him who loved us."
+  </p>
+  <p class="verse-ref reveal reveal-delay-1">Romans 8:37</p>
+  <div class="ornament">✦ ✦ ✦</div>
+</div>
+
+<!-- COMMUNITY -->
+<section class="section" id="community">
+  <div class="community-inner">
+    <div class="community-text">
+      <p class="section-label reveal">Our Community</p>
+      <h2 class="section-title reveal reveal-delay-1">
+        A Brotherhood &<br><span class="gold">Sisterhood</span> of Conquerors
+      </h2>
+      <div class="community-body">
+        <p class="reveal reveal-delay-2">
+          Conqueror is not just for Christians — it is for everyone who is going through something.
+          For everyone who has been broken open and is choosing to rebuild. Different faiths,
+          different backgrounds, different battles — the same goal: to become who we were always meant to be.
+        </p>
+        <p class="reveal reveal-delay-3">
+          Different missions. One movement. We serve others. We build ourselves.
+          We carry each other in the hard times and fill the good times with laughter, joy and wins together.
+        </p>
+      </div>
+      <div class="community-verse reveal reveal-delay-4">
+        <p>Two are better than one, because they have a good reward for their toil. For if they fall, one will lift up the other.</p>
+        <cite>Ecclesiastes 4:9–10</cite>
+      </div>
+    </div>
+    <div>
+      <div class="stats">
+        <div class="stat reveal">
+          <span class="stat-number">∞</span>
+          <span class="stat-label">Stories of Victory</span>
+        </div>
+        <div class="stat reveal reveal-delay-1">
+          <span class="stat-number">✝</span>
+          <span class="stat-label">Faith & Purpose</span>
+        </div>
+        <div class="stat reveal reveal-delay-2">
+          <span class="stat-number">1</span>
+          <span class="stat-label">Community, All Welcome</span>
+        </div>
+        <div class="stat reveal reveal-delay-3">
+          <span class="stat-number">♾</span>
+          <span class="stat-label">Lives to Impact</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION / CHARITY -->
+<section class="section mission-section" id="mission">
+  <div class="mission-inner">
+    <p class="section-label reveal" style="justify-content:center;">Our Mission</p>
+    <h2 class="section-title reveal reveal-delay-1" style="text-align:center;">
+      Giving Back.<br><span class="gold">Growing Together.</span>
+    </h2>
+    <p class="reveal reveal-delay-2" style="max-width:600px;margin:0 auto 1rem;font-size:1.1rem;line-height:1.9;color:var(--off-white);text-align:center;">
+      Conqueror is a community and a charity. Every initiative, every event, every act of generosity
+      flows from the same source: people who overcame, now reaching back to lift others up.
+    </p>
+    <div class="mission-grid">
+      <div class="mission-card reveal">
+        <div class="mission-card-accent"></div>
+        <span class="mission-card-icon">🙏</span>
+        <h3 class="mission-card-title">Outreach & Charity</h3>
+        <p class="mission-card-body">
+          We mobilise our community to serve the vulnerable — through practical aid, presence,
+          and the simple act of showing someone they are not forgotten.
+        </p>
+      </div>
+      <div class="mission-card reveal reveal-delay-2">
+        <div class="mission-card-accent"></div>
+        <span class="mission-card-icon">🔥</span>
+        <h3 class="mission-card-title">Mentorship & Growth</h3>
+        <p class="mission-card-body">
+          Conquerors invest in the next generation. Through mentorship, events and
+          discipleship we build people from the inside out.
+        </p>
+      </div>
+      <div class="mission-card reveal reveal-delay-3">
+        <div class="mission-card-accent"></div>
+        <span class="mission-card-icon">✦</span>
+        <h3 class="mission-card-title">Building Legacy</h3>
+        <p class="mission-card-body">
+          We believe in leaving the world better than we found it — in every city,
+          every neighbourhood, every single life touched by this community.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN -->
+<section class="section join-section" id="join">
+  <div class="join-inner">
+    <p class="join-sub reveal">You Are Called to More</p>
+    <h2 class="join-title reveal">Conqueror</h2>
+    <p class="join-body reveal reveal-delay-1">
+      Whether you are in the middle of your battle or celebrating a victory you never saw coming —
+      there is a place for you here. Join a community that refuses to let you fight alone.
+    </p>
+    <div class="email-form reveal reveal-delay-2">
+      <input type="email" class="email-input" placeholder="Enter your email address…">
+      <button class="email-submit">Join Now</button>
+    </div>
+    <p class="reveal reveal-delay-3" style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.35em;color:var(--muted);text-transform:uppercase;">
+      No spam. Just a community of Conquerors.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand">Conqueror</div>
+    <p class="footer-tagline">More than conquerors · Romans 8:37</p>
+  </div>
+  <ul class="footer-nav">
+    <li><a href="#about">Story</a></li>
+    <li><a href="#community">Community</a></li>
+    <li><a href="#mission">Mission</a></li>
+    <li><a href="#join">Join</a></li>
+  </ul>
+  <p class="footer-copy">© 2025 Conqueror · Victor Yankho Chisambiro</p>
+</footer>
+
+<script>
+  // Intersection Observer for reveal animations
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => observer.observe(el));
+
+  // Email form
+  const form = document.querySelector('.email-form');
+  const btn = form.querySelector('.email-submit');
+  const input = form.querySelector('.email-input');
+  btn.addEventListener('click', () => {
+    if (input.value.includes('@')) {
+      btn.textContent = '✓ Welcome!';
+      btn.style.background = 'linear-gradient(135deg,#7dbf8e,#4a9e5c)';
+      input.value = '';
+      setTimeout(() => {
+        btn.textContent = 'Join Now';
+        btn.style.background = '';
+      }, 3000);
+    } else {
+      input.style.borderColor = 'rgba(201,100,100,0.6)';
+      setTimeout(() => input.style.borderColor = '', 1500);
+    }
+  });
+</script>
+</body>
+</html>
