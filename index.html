@@ -408,7 +408,7 @@
   .pillar:hover { background: rgba(201,168,76,0.04); }
 
   .pillar-number {
-    font-family: 'Cinzel Decorative', serif;
+    font-family: 'Times New Roman', serif;
     font-size: 0.6rem;
     letter-spacing: 0.4em;
     color: var(--gold-dim);
@@ -446,16 +446,16 @@
     overflow: hidden;
   }
   .verse-banner::before {
-    content: '✝';
-    position: absolute;
-    font-size: 40vw;
-    color: rgba(201,168,76,0.02);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    font-family: serif;
-  }
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,..."); /* inline the SVG */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 70%;
+  pointer-events: none;
+  opacity: 1;
+}
   .verse-text {
     font-family: 'EB Garamond', serif;
     font-style: italic;
